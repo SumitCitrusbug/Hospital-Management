@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { sendWelcomeMail } = require("../utiles/sendEmail.js");
 const { generateWelcomeEmailHtml } = require("../mailTemplet/welcomeMail.js");
 
+//Register
 const register = async (req, res) => {
   const {
     email,
@@ -40,6 +41,7 @@ const register = async (req, res) => {
   }
 };
 
+//login
 const login = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -51,10 +53,15 @@ const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-    res.status(200).json({ token });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

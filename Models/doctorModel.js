@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../connection");
 const User = require("./userModel");
 
-const Doctor = sequelize.define("Patient", {
+const Doctor = sequelize.define("Doctor", {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -12,6 +12,7 @@ const Doctor = sequelize.define("Patient", {
   },
   contactNumber: {
     type: DataTypes.STRING,
+    unique: true,
   },
   userId: {
     type: DataTypes.INTEGER,
@@ -22,6 +23,7 @@ const Doctor = sequelize.define("Patient", {
   },
 });
 
-Patient.belongsTo(User, { foreignKey: "userId" });
+Doctor.sync();
+Doctor.belongsTo(User, { foreignKey: "userId" });
 
 module.exports = Doctor;

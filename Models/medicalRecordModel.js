@@ -27,6 +27,8 @@ const MedicalRecord = sequelize.define("MedicalRecord", {
   },
 });
 
+MedicalRecord.sync();
+
 MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
 MedicalRecord.belongsTo(Doctor, { foreignKey: "doctorId" });
 
