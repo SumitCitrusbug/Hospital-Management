@@ -1,5 +1,3 @@
-// models/patient.js
-
 const { DataTypes } = require("sequelize");
 const sequelize = require("../connection");
 const User = require("./userModel");
