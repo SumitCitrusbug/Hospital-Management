@@ -24,8 +24,10 @@ const User = sequelize.define("User", {
   },
   role: {
     type: DataTypes.STRING,
-    allowNull: false, // 'staff' or 'patient'
+    allowNull: false,
+    defaultValue: "patient", // 'staff' or 'patient'
   },
 });
 
+User.sync();
 module.exports = User;
