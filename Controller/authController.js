@@ -3,22 +3,30 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeMail } = require("../utiles/sendEmail.js");
 const { generateWelcomeEmailHtml } = require("../mailTemplet/welcomeMail.js");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../Validation/uservalidation.js");
+const { z } = require("zod");
+const { formatZodError } = require("../utiles/zoderror.js");
 
-//Register
+
+
+
 const register = async (req, res) => {
-  const {
-    email,
-    username,
-    password,
-    confirmPassword,
-    firstName,
-    lastName,
-    role,
-  } = req.body;
-
-  if (password !== confirmPassword)
-    return res.status(400).json({ message: "Passwords do not match" });
   try {
+    const validatedData = registerSchema.parse(req.body);
+
+    const {
+      email,
+      username,
+      password,
+      firstName,
+      confirmPassword,
+      lastName,
+      role,
+    } = validatedData;
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       email,
@@ -36,14 +44,20 @@ const register = async (req, res) => {
     }
     res.status(201).json(newUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.errors[0].message });
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
-//login
 const login = async (req, res) => {
-  const { username, password } = req.body;
+  const validatedData = loginSchema.parse(req.body);
+
+  const { username, password } = validatedData;
+
   try {
     const user = await User.findOne({ where: { username } });
     if (!user) {
@@ -63,7 +77,10 @@ const login = async (req, res) => {
     res.cookie("token", token, { httpOnly: true });
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    console.error(error);
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
     res.status(500).json({ error: "Internal server error" });
   }
 };

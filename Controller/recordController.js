@@ -1,9 +1,13 @@
 const MedicalRecord = require("../Models/medicalRecordModel");
 const Patient = require("../Models/patientModel");
 const Doctor = require("../Models/doctorModel");
+const { createRecordSchema } = require("../Validation/recordValidation");
+const { z } = require("zod");
+const { formatZodError } = require("../utiles/zoderror.js");
 const createMedicalRecord = async (req, res) => {
   try {
-    const { recordDate, description, patientId, doctorId } = req.body;
+    const validatedData = createRecordSchema.parse(req.body);
+    const { recordDate, description, patientId, doctorId } = validatedData;
     const medicalRecord = await MedicalRecord.create({
       recordDate,
       description,
@@ -14,6 +18,10 @@ const createMedicalRecord = async (req, res) => {
       .status(201)
       .json({ message: "Medical record created successfully", medicalRecord });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
     console.error(error);
     res.status(500).json({ error: error.errors[0].message });
   }
@@ -55,7 +63,9 @@ const getMedicalRecordById = async (req, res) => {
 const updateMedicalRecord = async (req, res) => {
   try {
     const { id } = req.params;
-    const { recordDate, description, patientId, doctorId } = req.body;
+    const validatedData = createRecordSchema.parse(req.body);
+    const { recordDate, description, patientId, doctorId } = validatedData;
+
     const medicalRecord = await MedicalRecord.findByPk(id);
     if (!medicalRecord) {
       return res.status(404).json({ error: "Medical record not found" });
@@ -70,6 +80,10 @@ const updateMedicalRecord = async (req, res) => {
       .status(200)
       .json({ message: "Medical record updated successfully", medicalRecord });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
     console.error(error);
     res.status(500).json({ error: error.errors[0].message });
   }

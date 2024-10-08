@@ -29,7 +29,15 @@ const MedicalRecord = sequelize.define("MedicalRecord", {
 
 MedicalRecord.sync();
 
-MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
-MedicalRecord.belongsTo(Doctor, { foreignKey: "doctorId" });
+MedicalRecord.belongsTo(
+  Patient,
+  { foreignKey: "patientId" },
+  { onDelete: "CASCADE" }
+);
+MedicalRecord.belongsTo(
+  Doctor,
+  { foreignKey: "doctorId" },
+  { onDelete: "CASCADE" }
+);
 
 module.exports = MedicalRecord;

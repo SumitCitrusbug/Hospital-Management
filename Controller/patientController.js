@@ -1,8 +1,12 @@
 const Patient = require("../Models/patientModel");
+const { createPatientSchema } = require("../Validation/patientValidation");
+const { z } = require("zod");
+const { formatZodError } = require("../utiles/zoderror.js");
 
 const createPatient = async (req, res) => {
   try {
-    const { name, dateOfBirth, gender, contactNumber, address } = req.body;
+    const validatedData = createPatientSchema.parse(req.body);
+    const { name, dateOfBirth, gender, contactNumber, address } = validatedData;
     const patient = await Patient.create({
       name,
       dateOfBirth,
@@ -13,6 +17,10 @@ const createPatient = async (req, res) => {
     });
     res.status(201).json({ message: "Patient created successfully", patient });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
     console.error(error);
     res.status(500).json({ error: error.errors[0].message });
   }
@@ -21,7 +29,13 @@ const createPatient = async (req, res) => {
 const getPatient = async (req, res) => {
   try {
     const patient = await Patient.findAll();
-    res.status(200).json({ message: "Patient fetched successfully", patient });
+    const data = patient.map(({ name, address, gender, contactNumber }) => ({
+      name,
+      address,
+      gender,
+      contactNumber,
+    }));
+    res.status(200).json({ message: "Patient fetched successfully", data });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
@@ -31,9 +45,10 @@ const getPatient = async (req, res) => {
 const updatePatient = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, dateOfBirth, gender, contactNumber, address } = req.body;
+    const validatedData = createPatientSchema.parse(req.body);
+    const { name, dateOfBirth, gender, contactNumber, address } = validatedData;
     const patient = await Patient.findByPk(id);
-    console.log("name",);
+    console.log("name");
     if (!patient) {
       return res.status(404).json({ error: "Patient not found" });
     }
@@ -46,7 +61,14 @@ const updatePatient = async (req, res) => {
       address,
     });
     res.status(200).json({ message: "Patient updated successfully", patient });
-  } catch (error) {}
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const formattedErrors = formatZodError(error.errors);
+      return res.status(400).json({ errors: formattedErrors });
+    }
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 const deletePatient = async (req, res) => {
   try {

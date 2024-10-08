@@ -8,6 +8,7 @@ const {
   deleteDoctor,
 } = require("../Controller/doctorController.js");
 
+
 router.post("/create", createDoctor);
 router.get("/getall", getDoctor);
 router.put("/update/:id", updateDoctor);

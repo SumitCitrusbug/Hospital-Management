@@ -14,7 +14,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const isStaff = (req, res, next) => {
-  console.log(req);
+  console.log(req.userRole);
   if (req.userRole !== "staff") {
     return res.status(403).json({
       message: "Access denied. Only staff members can perform this action.",

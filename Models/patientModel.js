@@ -35,6 +35,6 @@ const Patient = sequelize.define("Patient", {
 });
 
 Patient.sync();
-Patient.belongsTo(User, { foreignKey: "userId" });
+Patient.belongsTo(User, { foreignKey: "userId" }, { onDelete: "CASCADE" });
 
 module.exports = Patient;

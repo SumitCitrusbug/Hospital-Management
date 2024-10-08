@@ -24,6 +24,6 @@ const Doctor = sequelize.define("Doctor", {
 });
 
 Doctor.sync();
-Doctor.belongsTo(User, { foreignKey: "userId" });
+Doctor.belongsTo(User, { foreignKey: "userId" }, { onDelete: "CASCADE" });
 
 module.exports = Doctor;
